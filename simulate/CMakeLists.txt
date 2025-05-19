@@ -10,7 +10,6 @@ list(APPEND CMAKE_PREFIX_PATH "/opt/unitree_robotics/lib/cmake")
 find_package(mujoco REQUIRED)
 find_package(unitree_sdk2 REQUIRED)
 
-
 file(GLOB SIM_SRC
     src/joystick/joystick.cc
     src/mujoco/*.cc
@@ -25,7 +24,18 @@ set(SIM_DEPENDENCIES
 
 
 add_executable(unitree_mujoco ${SIM_SRC} src/main.cc)
-target_link_libraries(unitree_mujoco ${SIM_DEPENDENCIES})
+target_link_libraries(unitree_mujoco PRIVATE ${SIM_DEPENDENCIES})
+
+# for SDK1
+message("-- CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64.*")
+  set(ARCH amd64)
+endif()
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64.*")
+  set(ARCH arm64)
+endif()
+target_link_libraries(unitree_mujoco PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../unitree_legged_sdk/lib/cpp/${ARCH}/libunitree_legged_sdk.a -pthread)
+target_include_directories(unitree_mujoco PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../unitree_legged_sdk/include)
 
 add_executable(test test/test_unitree_sdk2.cpp)
 target_link_libraries(test unitree_sdk2)
