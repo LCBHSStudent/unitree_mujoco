@@ -94,6 +94,14 @@ struct JoystickId
     };
 };
 
+enum FootIdx
+{
+    FOOT_FR = 0,
+    FOOT_FL = 1,
+    FOOT_RR = 2,
+    FOOT_RL = 3,
+};
+
 class UnitreeSdk2Bridge
 {
 public:
@@ -110,6 +118,7 @@ public:
     void Run();
     void PrintSceneInformation();
     void CheckSensor();
+    void CheckGeometry();
     void SetupJoystick(string device, string js_type, int bits);
 
     ChannelSubscriberPtr<unitree_go::msg::dds_::LowCmd_> low_cmd_go_suber_;
@@ -146,8 +155,11 @@ public:
     int have_frame_sensor_ = false;
     int idl_type_ = 0; // 0: unitree_go, 1: unitree_hg
 
+    std::array<int, 4> foot_contact_geom_id_ = {-1, -1, -1, -1};
+
 private:
     void GetWirelessRemote();
+    std::array<double, 4> GetFootForce();
 };
 
 #endif

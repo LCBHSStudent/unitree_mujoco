@@ -41,5 +41,3 @@ add_executable(test test/test_unitree_sdk2.cpp)
 target_link_libraries(test unitree_sdk2)
 
 add_executable(jstest src/joystick/jstest.cc src/joystick/joystick.cc)
-
-set(CMAKE_BUILD_TYPE Release)

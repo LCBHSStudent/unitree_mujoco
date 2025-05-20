@@ -104,7 +104,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0"
               type="cylinder" class="collision" />
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black" />
-            <geom name="FL" class="foot" />
+            <geom name="FL_foot_contact" class="foot" />
             <body name="FL_foot" pos="0 0 -0.213" />
           </body>
         </body>
@@ -139,7 +139,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0"
               type="cylinder" class="collision" />
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black" />
-            <geom name="FR" class="foot" />
+            <geom name="FR_foot_contact" class="foot" />
             <body name="FR_foot" pos="0 0 -0.213" />
           </body>
         </body>
@@ -174,7 +174,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0"
               type="cylinder" class="collision" />
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black" />
-            <geom name="RL" class="foot" />
+            <geom name="RL_foot_contact" class="foot" />
             <body name="RL_foot" pos="0 0 -0.213" />
           </body>
         </body>
@@ -211,7 +211,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0"
               type="cylinder" class="collision" />
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black" />
-            <geom name="RR" class="foot" />
+            <geom name="RR_foot_contact" class="foot" />
             <body name="RR_foot" pos="0 0 -0.213" />
           </body>
         </body>

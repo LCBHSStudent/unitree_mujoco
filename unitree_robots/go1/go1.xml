@@ -113,7 +113,7 @@
             <geom class="visual" mesh="calf"/>
             <geom class="calf1"/>
             <geom class="calf2"/>
-            <geom name="FR" class="foot"/>
+            <geom name="FR_foot_contact" class="foot"/>
             <site name="FR" pos="0 0 -0.213" type="sphere" size="0.023" group="5"/>
             <body name="FR_foot" pos="0 0 -0.213"/>
           </body>
@@ -141,7 +141,7 @@
             <geom class="visual" mesh="calf"/>
             <geom class="calf1"/>
             <geom class="calf2"/>
-            <geom name="FL" class="foot"/>
+            <geom name="FL_foot_contact" class="foot"/>
             <site name="FL" pos="0 0 -0.213" type="sphere" size="0.023" group="5"/>
             <body name="FL_foot" pos="0 0 -0.213"/>
           </body>
@@ -170,7 +170,7 @@
             <geom class="visual" mesh="calf"/>
             <geom class="calf1"/>
             <geom class="calf2"/>
-            <geom name="RR" class="foot"/>
+            <geom name="RR_foot_contact" class="foot"/>
             <site name="RR" pos="0 0 -0.213" type="sphere" size="0.023" group="5"/>
             <body name="RR_foot" pos="0 0 -0.213"/>
           </body>
@@ -199,7 +199,7 @@
             <geom class="visual" mesh="calf"/>
             <geom class="calf1"/>
             <geom class="calf2"/>
-            <geom name="RL" class="foot"/>
+            <geom name="RL_foot_contact" class="foot"/>
             <site name="RL" pos="0 0 -0.213" type="sphere" size="0.023" group="5"/>
             <body name="RL_foot" pos="0 0 -0.213"/>
           </body>

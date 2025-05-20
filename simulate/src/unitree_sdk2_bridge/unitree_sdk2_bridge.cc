@@ -3,6 +3,7 @@
 UnitreeSdk2Bridge::UnitreeSdk2Bridge(mjModel *model, mjData *data) : mj_model_(model), mj_data_(data)
 {
     CheckSensor();
+    CheckGeometry();
 
     if (idl_type_ == 0)
     {
@@ -67,6 +68,46 @@ void UnitreeSdk2Bridge::LowCmdHgHandler(const void *msg)
     }
 }
 
+std::array<double, 4> UnitreeSdk2Bridge::GetFootForce()
+{
+    std::array<double, 4> foot_force {0};
+    for (int i = 0; i < foot_contact_geom_id_.size(); ++i) {
+        if (foot_contact_geom_id_[i] == -1) {
+            return foot_force;
+        }
+    }
+
+    int FR_foot_id = foot_contact_geom_id_[FOOT_FR];
+    int FL_foot_id = foot_contact_geom_id_[FOOT_FL];
+    int RR_foot_id = foot_contact_geom_id_[FOOT_RR];
+    int RL_foot_id = foot_contact_geom_id_[FOOT_RL];
+
+    for (int i = 0; i < mj_data_->ncon; ++i) {
+        const auto& contact = mj_data_->contact[i];
+        int target_id = -1;
+        if (contact.geom1 == FR_foot_id || contact.geom2 == FR_foot_id) {
+            target_id = FOOT_FR;
+        }
+        if (contact.geom1 == FL_foot_id || contact.geom2 == FL_foot_id) {
+            target_id = FOOT_FL;
+        }
+        if (contact.geom1 == RR_foot_id || contact.geom2 == RR_foot_id) {
+            target_id = FOOT_RR;
+        }
+        if (contact.geom1 == RL_foot_id || contact.geom2 == RL_foot_id) {
+            target_id = FOOT_RL;
+        }
+
+        if (target_id != -1) {
+            if (contact.efc_address != -1 && contact.dim >= 1 && mj_data_ && mj_data_->efc_force) {
+                foot_force[target_id] = mj_data_->efc_force[contact.efc_address];
+            }
+        }
+    }
+
+    return foot_force;
+}
+
 void UnitreeSdk2Bridge::PublishLowStateGo()
 {
     if (mj_data_)
@@ -85,14 +126,14 @@ void UnitreeSdk2Bridge::PublishLowStateGo()
             low_state_go_.imu_state().quaternion()[2] = mj_data_->sensordata[dim_motor_sensor_ + 2];
             low_state_go_.imu_state().quaternion()[3] = mj_data_->sensordata[dim_motor_sensor_ + 3];
 
-	    double w = low_state_go_.imu_state().quaternion()[0];
-	    double x = low_state_go_.imu_state().quaternion()[1];
-	    double y = low_state_go_.imu_state().quaternion()[2];
-	    double z = low_state_go_.imu_state().quaternion()[3];
+            double w = low_state_go_.imu_state().quaternion()[0];
+            double x = low_state_go_.imu_state().quaternion()[1];
+            double y = low_state_go_.imu_state().quaternion()[2];
+            double z = low_state_go_.imu_state().quaternion()[3];
 
-	    low_state_go_.imu_state().rpy()[0] = atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y));
-	    low_state_go_.imu_state().rpy()[1] = asin(2 * (w * y - z * x));
-	    low_state_go_.imu_state().rpy()[2] = atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
+            low_state_go_.imu_state().rpy()[0] = atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y));
+            low_state_go_.imu_state().rpy()[1] = asin(2 * (w * y - z * x));
+            low_state_go_.imu_state().rpy()[2] = atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
 
             low_state_go_.imu_state().gyroscope()[0] = mj_data_->sensordata[dim_motor_sensor_ + 4];
             low_state_go_.imu_state().gyroscope()[1] = mj_data_->sensordata[dim_motor_sensor_ + 5];
@@ -108,6 +149,12 @@ void UnitreeSdk2Bridge::PublishLowStateGo()
             GetWirelessRemote();
             memcpy(&low_state_go_.wireless_remote()[0], &wireless_remote_, 40);
         }
+
+        auto foot_force = GetFootForce();
+        low_state_go_.foot_force()[FOOT_FR] = foot_force[FOOT_FR];
+        low_state_go_.foot_force()[FOOT_FL] = foot_force[FOOT_FL];
+        low_state_go_.foot_force()[FOOT_RR] = foot_force[FOOT_RR];
+        low_state_go_.foot_force()[FOOT_RL] = foot_force[FOOT_RL];
 
         low_state_go_puber_->Write(low_state_go_);
     }
@@ -131,14 +178,14 @@ void UnitreeSdk2Bridge::PublishLowStateHg()
             low_state_hg_.imu_state().quaternion()[2] = mj_data_->sensordata[dim_motor_sensor_ + 2];
             low_state_hg_.imu_state().quaternion()[3] = mj_data_->sensordata[dim_motor_sensor_ + 3];
 
-	    double w = low_state_hg_.imu_state().quaternion()[0];
-	    double x = low_state_hg_.imu_state().quaternion()[1];
-	    double y = low_state_hg_.imu_state().quaternion()[2];
-	    double z = low_state_hg_.imu_state().quaternion()[3];
+            double w = low_state_hg_.imu_state().quaternion()[0];
+            double x = low_state_hg_.imu_state().quaternion()[1];
+            double y = low_state_hg_.imu_state().quaternion()[2];
+            double z = low_state_hg_.imu_state().quaternion()[3];
 
-	    low_state_hg_.imu_state().rpy()[0] = atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y));
-	    low_state_hg_.imu_state().rpy()[1] = asin(2 * (w * y - z * x));
-	    low_state_hg_.imu_state().rpy()[2] = atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
+            low_state_hg_.imu_state().rpy()[0] = atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y));
+            low_state_hg_.imu_state().rpy()[1] = asin(2 * (w * y - z * x));
+            low_state_hg_.imu_state().rpy()[2] = atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
 
             low_state_hg_.imu_state().gyroscope()[0] = mj_data_->sensordata[dim_motor_sensor_ + 4];
             low_state_hg_.imu_state().gyroscope()[1] = mj_data_->sensordata[dim_motor_sensor_ + 5];
@@ -270,6 +317,28 @@ void UnitreeSdk2Bridge::SetupJoystick(string device, string js_type, int bits)
     else
     {
         cout << "Unsupported gamepad." << endl;
+    }
+}
+
+void UnitreeSdk2Bridge::CheckGeometry()
+{
+    for (int i = 0; i < mj_model_->ngeom; ++i) {
+        const char *name = mj_id2name(mj_model_, mjOBJ_GEOM, i);
+        if (!name) {
+            continue;
+        }
+        if (strcmp(name, "FR_foot_contact") == 0) {
+            foot_contact_geom_id_[FOOT_FR] = i;
+        }
+        if (strcmp(name, "FL_foot_contact") == 0) {
+            foot_contact_geom_id_[FOOT_FL] = i;
+        }
+        if (strcmp(name, "RR_foot_contact") == 0) {
+            foot_contact_geom_id_[FOOT_RR] = i;
+        }
+        if (strcmp(name, "RL_foot_contact") == 0) {
+            foot_contact_geom_id_[FOOT_RL] = i;
+        }
     }
 }
 
