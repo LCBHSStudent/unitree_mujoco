@@ -102,10 +102,15 @@ enum FootIdx
     FOOT_RL = 3,
 };
 
+namespace mujoco
+{
+    class Simulate;
+}
+
 class UnitreeSdk2Bridge
 {
 public:
-    UnitreeSdk2Bridge(mjModel *model, mjData *data);
+    UnitreeSdk2Bridge(mjModel *model, mjData *data, mujoco::Simulate *sim);
     ~UnitreeSdk2Bridge();
 
     void LowCmdGoHandler(const void *msg);
@@ -147,6 +152,7 @@ public:
 
     mjData *mj_data_;
     mjModel *mj_model_;
+    mujoco::Simulate *sim_;
 
     int num_motor_ = 0;
     int dim_motor_sensor_ = 0;

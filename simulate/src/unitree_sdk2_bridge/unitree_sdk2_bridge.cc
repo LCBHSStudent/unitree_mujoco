@@ -1,6 +1,8 @@
 #include "unitree_sdk2_bridge.h"
 
-UnitreeSdk2Bridge::UnitreeSdk2Bridge(mjModel *model, mjData *data) : mj_model_(model), mj_data_(data)
+#include "../mujoco/simulate.h"
+
+UnitreeSdk2Bridge::UnitreeSdk2Bridge(mjModel *model, mjData *data, mujoco::Simulate *sim) : mj_model_(model), mj_data_(data), sim_(sim)
 {
     CheckSensor();
     CheckGeometry();
@@ -70,45 +72,47 @@ void UnitreeSdk2Bridge::LowCmdHgHandler(const void *msg)
 
 std::array<double, 4> UnitreeSdk2Bridge::GetFootForce()
 {
+    const std::unique_lock<std::recursive_mutex> lock(sim_->mtx);
+
     std::array<double, 4> foot_force {0};
-    // for (int i = 0; i < foot_contact_geom_id_.size(); ++i) {
-    //     if (foot_contact_geom_id_[i] == -1) {
-    //         return foot_force;
-    //     }
-    // }
+    for (int i = 0; i < foot_contact_geom_id_.size(); ++i) {
+        if (foot_contact_geom_id_[i] == -1) {
+            return foot_force;
+        }
+    }
 
-    // int FR_foot_id = foot_contact_geom_id_[FOOT_FR];
-    // int FL_foot_id = foot_contact_geom_id_[FOOT_FL];
-    // int RR_foot_id = foot_contact_geom_id_[FOOT_RR];
-    // int RL_foot_id = foot_contact_geom_id_[FOOT_RL];
+    int FR_foot_id = foot_contact_geom_id_[FOOT_FR];
+    int FL_foot_id = foot_contact_geom_id_[FOOT_FL];
+    int RR_foot_id = foot_contact_geom_id_[FOOT_RR];
+    int RL_foot_id = foot_contact_geom_id_[FOOT_RL];
 
-    // for (int i = 0; i < mj_data_->ncon; ++i) {
-    //     const auto& contact = mj_data_->contact[i];
-    //     int target_id = -1;
-    //     if (contact.geom1 == FR_foot_id || contact.geom2 == FR_foot_id) {
-    //         target_id = FOOT_FR;
-    //     }
-    //     if (contact.geom1 == FL_foot_id || contact.geom2 == FL_foot_id) {
-    //         target_id = FOOT_FL;
-    //     }
-    //     if (contact.geom1 == RR_foot_id || contact.geom2 == RR_foot_id) {
-    //         target_id = FOOT_RR;
-    //     }
-    //     if (contact.geom1 == RL_foot_id || contact.geom2 == RL_foot_id) {
-    //         target_id = FOOT_RL;
-    //     }
+    for (int i = 0; i < mj_data_->ncon; ++i) {
+        const auto& contact = mj_data_->contact[i];
+        int target_id = -1;
+        if (contact.geom1 == FR_foot_id || contact.geom2 == FR_foot_id) {
+            target_id = FOOT_FR;
+        }
+        if (contact.geom1 == FL_foot_id || contact.geom2 == FL_foot_id) {
+            target_id = FOOT_FL;
+        }
+        if (contact.geom1 == RR_foot_id || contact.geom2 == RR_foot_id) {
+            target_id = FOOT_RR;
+        }
+        if (contact.geom1 == RL_foot_id || contact.geom2 == RL_foot_id) {
+            target_id = FOOT_RL;
+        }
 
-    //     if (target_id != -1) {
-    //         if (
-    //             contact.efc_address >= 0 &&
-    //             contact.dim >= 1 &&
-    //             mj_data_->efc_force &&
-    //             mj_data_->nefc > contact.efc_address
-    //         ) {
-    //             foot_force[target_id] = mj_data_->efc_force[contact.efc_address];
-    //         }
-    //     }
-    // }
+        if (target_id != -1) {
+            if (
+                contact.efc_address >= 0 &&
+                contact.dim >= 1 &&
+                mj_data_->efc_force &&
+                mj_data_->nefc > contact.efc_address
+            ) {
+                foot_force[target_id] = mj_data_->efc_force[contact.efc_address];
+            }
+        }
+    }
 
     return foot_force;
 }

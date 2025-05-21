@@ -554,6 +554,7 @@ void PhysicsThread(mj::Simulate *sim, const char *filename)
 
 void *UnitreeSdk2BridgeThread(void *arg)
 {
+  mj::Simulate *sim = reinterpret_cast<mj::Simulate *>(arg);
   // Wait for mujoco data
   while (1)
   {
@@ -575,7 +576,7 @@ void *UnitreeSdk2BridgeThread(void *arg)
   }
 
   ChannelFactory::Instance()->Init(config.domain_id, config.interface);
-  UnitreeSdk2Bridge unitree_interface(m, d);
+  UnitreeSdk2Bridge unitree_interface(m, d, sim);
 
   if (config.use_joystick == 1)
   {
@@ -668,7 +669,7 @@ int main(int argc, char **argv)
   }
 
   pthread_t unitree_thread;
-  int rc = pthread_create(&unitree_thread, NULL, UnitreeSdk2BridgeThread, NULL);
+  int rc = pthread_create(&unitree_thread, NULL, UnitreeSdk2BridgeThread, reinterpret_cast<void*>(sim.get()));
   if (rc != 0)
   {
     std::cout << "Error:unable to create thread," << rc << std::endl;
